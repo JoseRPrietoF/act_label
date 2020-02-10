@@ -32,11 +32,12 @@ def get_all_acts(file):
         line = line.rstrip()
         s = line.split(",")
         id, volume, start_img = s[0], s[1], s[9]
+        id_vol = s[2]
         fol_start, fol_end = s[3], s[5]
         start_img = start_img.split(".")[0]
-        res.append((id, volume, start_img))
+        res.append((id, id_vol, volume, start_img))
         aux = res_by_legajo.get(volume, [])
-        aux.append((id, volume, fol_start, fol_end, start_img))
+        aux.append((id, id_vol, volume, fol_start, fol_end, start_img))
         res_by_legajo[volume] = aux
     return res, res_by_legajo
 
@@ -115,7 +116,7 @@ def get_info(act_order, file_order, acts_page):
         Volume_order_img = img_order_legajo[volume_name]
 
         for i, _ in enumerate(Volume):
-            _, _, _, _, first_img_with_act = Volume[i]
+            _, _, _, _, _, first_img_with_act = Volume[i]
             if first_img_with_act != "#N/A" and len(first_img_with_act) > 10:
                 break
 
@@ -188,10 +189,10 @@ def process(volume_name, act_order, file_order, acts_page):
             n_textRegions -= 1
             n_blank_continued = 0
         for idx in range(idx_counts, idx_counts + n_textRegions):
-            id, volume, fol_start, fol_end, start_img = Volume[idx]
+            id, id_vol, volume, fol_start, fol_end, start_img = Volume[idx]
             fol_start = fol_start.lstrip("0")
             fol_end = fol_end.lstrip("0")
-            print(id, volume, fol_start, fol_end, start_img)
+            print(id, volume, id_vol, fol_start, fol_end, start_img)
 
             if img_name != start_img:
                 if etiq != "AM" and etiq != "AI":
