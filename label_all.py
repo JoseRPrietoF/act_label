@@ -1,6 +1,6 @@
 from utils import  get_info, process
 
-act_order = "/data/chancery2/acts.csv"
+act_order = "/data/chancery2/acts-avec-correction.csv"
 acts_page = "/data/chancery2/JJ35-95_ActSegmentation20180615/"
 file_order = "/data/chancery2/page2.csv"
 all_volumes, all_act_per_legajo, img_order_legajo, vol_first_image = get_info(act_order, file_order, acts_page)

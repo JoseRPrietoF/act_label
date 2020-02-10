@@ -1,7 +1,7 @@
 from utils import process
 import sys
 
-act_order = "/data/chancery2/acts.csv"
+act_order = "/data/chancery2/acts-avec-correction.csv"
 acts_page = "/data/chancery2/JJ35-95_ActSegmentation20180615/"
 file_order = "/data/chancery2/page2.csv"
 

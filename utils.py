@@ -189,6 +189,8 @@ def process(volume_name, act_order, file_order, acts_page):
             n_blank_continued = 0
         for idx in range(idx_counts, idx_counts + n_textRegions):
             id, volume, fol_start, fol_end, start_img = Volume[idx]
+            fol_start = fol_start.lstrip("0")
+            fol_end = fol_end.lstrip("0")
             print(id, volume, fol_start, fol_end, start_img)
 
             if img_name != start_img:
@@ -208,7 +210,7 @@ def process(volume_name, act_order, file_order, acts_page):
                 # exit()
             etiq = "AC"
             coords, id_tr = textRegions[idx - idx_counts]
-            if fol_end:
+            if fol_end and fol_end != fol_start:
                 etiq = "AI"
                 set_AF = True
                 AM_counts = pags_between(fol_start, fol_end, Volume_order_img)
