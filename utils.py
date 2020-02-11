@@ -125,7 +125,14 @@ def get_info(act_order, file_order, acts_page):
 
     return all_volumes, all_act_per_legajo, img_order_legajo, vol_first_image
 
-def process(volume_name, act_order, file_order, acts_page):
+def get_starts_volume(volume):
+    res = {}
+    for id, id_vol, volume, fol_start, fol_end, start_img in volume:
+        num_starts = res.get(start_img, 0)
+        res[start_img] = num_starts+1
+    return res
+
+def process(volume_name, act_order, file_order, acts_page, print=print):
     all_volumes, all_act_per_legajo, img_order_legajo, vol_first_image = get_info(act_order, file_order, acts_page)
     volumes_result = []
     corrects = 0
@@ -156,6 +163,7 @@ def process(volume_name, act_order, file_order, acts_page):
     blank = False
     n_blank_continued = 0
     MAX_n_blank_continued = 5
+    error_message = ""
 
     for folio, folio_legajo, img_name in Volume_order_img:
         if not img_name:
@@ -200,12 +208,14 @@ def process(volume_name, act_order, file_order, acts_page):
                     break
                 else:
                     print("Problem near to act {}".format(id))
+                    error_message = "Problem near to act {}".format(id)
                     ERROR = True
                     break
                     # exit()
             if etiq == "AM" or etiq == "AI":
                 print("Problem with order. etiq: {}".format(etiq))
                 print("Problem near to act {}".format(id))
+                error_message = "Problem near to act {}".format(id)
                 ERROR = True
                 break
                 # exit()
@@ -218,6 +228,7 @@ def process(volume_name, act_order, file_order, acts_page):
                 if AM_counts == "ERROR":
                     ERROR = True
                     print("Error on pags between with {} and {}".format(fol_start, fol_end))
+                    error_message = "Error on pags between with {} and {}".format(fol_start, fol_end)
                     break
 
                 print(fol_start, fol_end, AM_counts)
@@ -230,7 +241,8 @@ def process(volume_name, act_order, file_order, acts_page):
             print("<<<<< {} blank page".format(img_name))
             n_blank_continued += 1
             if MAX_n_blank_continued == n_blank_continued:
-                print("To many continuous blank pages ")
+                error_message = "To many continuous blank pages around {}".format(int(id)-MAX_n_blank_continued)
+                print(error_message)
                 ERROR = True
                 break
                 # exit()
@@ -245,7 +257,7 @@ def process(volume_name, act_order, file_order, acts_page):
             n_correct = "0 acts -> Something happened at the beginning"
         else:
             n_correct = "near to {} valid acts".format(n_correct)
-        volumes_result.append((volume_name, "ERROR", "{}".format(n_correct)))
+        volumes_result.append((volume_name, "ERROR", "{}".format(n_correct), error_message))
     else:
         volumes_result.append((volume_name, "---------- ALL CORRECT -------------- Have a beer to celebrate it!"))
         corrects += 1
