@@ -68,6 +68,7 @@ def get_file_order(file_order):
         folio = line[1]
         folio_legajo = line[2]
         res.append((folio, folio_legajo, img_name))
+
         # if len(s) <= 2:
         #     pass
         #     # print(line)
@@ -104,7 +105,12 @@ def get_info(act_order, file_order, acts_page):
     all_volumes = list(all_act_per_legajo.keys())
 
     # Delete some volumes
-    all_volumes = [x for x in all_volumes if len(x) == 5]
+    # [print(x) for x in all_volumes]
+    # print("-"*10)
+    # all_volumes = [x for x in all_volumes if len(x) == 5]
+    all_volumes = [x for x in all_volumes if 4 < len(x) < 7]
+    # [print(x) for x in all_volumes]
+    # print("-"*10)
 
     """
     ALL first images of all volumes
@@ -113,7 +119,8 @@ def get_info(act_order, file_order, acts_page):
     for volume_name in all_volumes:
 
         Volume = all_act_per_legajo[volume_name]
-        Volume_order_img = img_order_legajo[volume_name]
+        # print("V")
+        # Volume_order_img = img_order_legajo[volume_name]
 
         for i, _ in enumerate(Volume):
             _, _, _, _, _, first_img_with_act = Volume[i]
@@ -122,7 +129,6 @@ def get_info(act_order, file_order, acts_page):
 
         # print("Volume {} first_img_with_act {}".format(volume_name, first_img_with_act))
         vol_first_image[volume_name] = first_img_with_act
-
     return all_volumes, all_act_per_legajo, img_order_legajo, vol_first_image
 
 def get_starts_volume(volume):

@@ -1,4 +1,5 @@
 from utils import  get_info, process
+import re
 
 def print_aux(a, *args):
     print(end="")
@@ -10,11 +11,15 @@ all_volumes, all_act_per_legajo, img_order_legajo, vol_first_image = get_info(ac
 
 volumes_result = []
 for volume_name in all_volumes:
-    if int(volume_name[-2:]) >= 85 and volume_name[-1] != "A" and volume_name[-1] != "B":
+    number = int(re.findall(r'\d+', volume_name)[0])
+    if number >= 85:
         print("Skipping {}".format(volume_name))
         continue
-    print("/////////// START WITH {} //////////".format(volume_name))
-    volumes_result.extend(process(volume_name,act_order, file_order, acts_page, print=print_aux))
+    try:
+        print("/////////// START WITH {} //////////".format(volume_name))
+        volumes_result.extend(process(volume_name,act_order, file_order, acts_page, print=print_aux))
+    except:
+        print("Problem with volume {}".format(volume_name))
 
 for v in volumes_result:
     print(v)
