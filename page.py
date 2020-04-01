@@ -183,7 +183,12 @@ class PAGE():
         coords_to_append = []
         for c in coords:
             x, y = c.split(",")
-            coords_to_append.append((int(x), int(y)))
+            try:
+                coords_to_append.append((int(x), int(y)))
+            except Exception as e:
+                print(e)
+                print(c)
+                raise e
         return coords_to_append
 
     def parse(self):

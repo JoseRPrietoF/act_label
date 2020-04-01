@@ -1,4 +1,4 @@
-import glob
+import glob, os
 from page import PAGE
 
 def get_all(path, ext="xml"):
@@ -23,7 +23,7 @@ def get_all_acts(file):
     :param file:
     :return:
     """
-    f = open(file, "r")
+    f = open(file, "r", encoding="latin-1")
     lines = f.readlines()[1:]
     f.close()
     res = []
@@ -170,7 +170,7 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
     n_blank_continued = 0
     MAX_n_blank_continued = 5
     error_message = ""
-
+    trs_num = 0
     for folio, folio_legajo, img_name in Volume_order_img:
         if not img_name:
             print("////////////// Folio {} is a blank page //////////////".format(folio))
@@ -184,6 +184,7 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
         print("{} -> {}".format(xml_page, n_textRegions))
         if AM_counts > 0:
             coords = "ALL"
+            coords, id_tr = textRegions[0]
             etiq = "AM"
             print("{1} ----------------------------> {0}".format(etiq, img_name))
             print(id, volume, fol_start, fol_end, img_name)
@@ -197,6 +198,7 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
             set_AF = False
             etiq = "AF"
             coords, id_tr = textRegions[0]
+            trs_num += 1
             print("{1} ----------------------------> {0}".format(etiq, img_name))
             print(id, volume, fol_start, fol_end, img_name)
             res.append((id, volume, fol_start, fol_end, img_name, coords, etiq))
@@ -225,8 +227,14 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
                 ERROR = True
                 break
                 # exit()
+
+            if idx - idx_counts + trs_num >= len(textRegions):
+                ERROR = True
+                break
+            else:
+                coords, id_tr = textRegions[idx - idx_counts + trs_num]
+
             etiq = "AC"
-            coords, id_tr = textRegions[idx - idx_counts]
             if fol_end and fol_end != fol_start:
                 etiq = "AI"
                 set_AF = True
@@ -241,6 +249,7 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
             start_img_name = start_img.split(".")[0]
             print("{1} ----------------------------> {0}".format(etiq, img_name))
             res.append((id, volume, fol_start, fol_end, start_img, coords, etiq))
+        trs_num = 0
         if ERROR:
             break
         if blank:  # blank page, jump!
@@ -254,7 +263,6 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
                 # exit()
             blank = False
             continue
-
         idx_counts += n_textRegions
         print("*" * 20)
     if ERROR:
@@ -265,7 +273,37 @@ def process(volume_name, act_order, file_order, acts_page, print=print):
             n_correct = "near to {} valid acts".format(n_correct)
         volumes_result.append((volume_name, "ERROR", "{}".format(n_correct), error_message))
     else:
-        volumes_result.append((volume_name, "---------- ALL CORRECT -------------- Have a beer to celebrate it!"))
+        volumes_result.append((volume_name, "---------- ALL CORRECT --------------"))
         corrects += 1
 
-    return volumes_result
+    return volumes_result, res
+
+
+def create_IMF_file(res_volume, fname, path_xmls):
+    """
+    res_volume line: ('1', 'JJ035', '1r', '', 'FRCHANJJ_JJ035_0016R_A', [(2703, 831), (0, 831), (0, 0), (2703, 0)], 'AC')
+    """
+    f = open(fname, "w")
+    #f.write("#!MLF!#\n")
+    # last = res_volume[0][4]
+    last = ""
+    name_ = '"*/{}.lab"\n'
+    first = True
+    for id_act, volume, _,_, name_img, coords, label in res_volume:
+        xmls_name = os.path.join(path_xmls, "{}.xml".format(name_img))
+        page = PAGE(xmls_name)
+        height = page.get_height()
+        ys = [y[1] for y in coords]
+        from_ = max(min(ys),0)
+        to_ = min(max(ys), height)
+        print(name_img, from_, to_, label)
+        if last != name_img:
+            if not first:
+                f.write(".\n")
+            else:
+                first = False
+            last = name_img
+            f.write(name_.format(last))
+        f.write("{} {} {}\n".format(from_, to_, label))
+    f.write(".")
+    f.close()
